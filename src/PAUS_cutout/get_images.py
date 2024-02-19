@@ -50,6 +50,8 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
 
 
         this_df_list = []
+        this_archivepath_list = []
+        this_filename_list = []
         for wl_nb in wl_nbs:
             query = f"""SELECT i.archivepath, i.filename, i.zp_nightly,
                     i.ra_min, i.ra_max, i.dec_min, i.dec_max
@@ -63,17 +65,34 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
             this_df = pd.read_sql(query, engine)
             this_df_list.append(this_df)
         
-            # Add image paths to the download list
-            archivepath_list += list(this_df.archivepath)
-            filename_list += list(this_df.filename)
-
         dfs.append(this_df_list)
 
-    image_list = []
-    for ap, fn in zip(archivepath_list, filename_list):
-        image_list.append(f'{ap}/{fn}')
+    return dfs
 
-    # This is the list of paths of images to download
-    unique_image_list = np.unique(image_list)
 
-    return unique_image_list, dfs
+def download_images(dfs, wl_nbs, img_folder):
+    '''
+    Downloads the images and stores them in separate folders by NB.
+    '''
+    os.makedirs(f'{img_folder}', exist_ok=True)
+
+    for j, df_list in enumerate(dfs):
+        for i, wavelength in enumerate(wl_nbs):
+            save_path = f'{img_folder}/{wavelength}'
+            img_list = []
+            zp_list = []
+            os.makedirs(save_path, exist_ok=True)
+
+            df = df_list[i]
+
+            for _, row in df.iterrows():
+                load_dir = f'{row.archivepath}/{row.filename}'
+                shutil.copyfile(load_dir, f'{save_path}/{row.filename}')
+                img_list.append(row.filename)
+                zp_list.append(row.zp_nightly)
+                
+            with open(f'{save_path}/img_list.txt', 'w') as writer:
+                [writer.write(f'{img_name}\n') for img_name in img_list]
+                
+            with open(f'{save_path}/zero_points.txt', 'w') as writer:
+                [writer.write(f'{zp}\n') for zp in zp_list]
