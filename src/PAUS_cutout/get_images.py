@@ -81,7 +81,10 @@ def download_images(dfs, NB_wavelength_list, img_folder):
 
             for _, row in df.iterrows():
                 load_dir = f'{row.archivepath}/{row.filename}'
-                shutil.copyfile(load_dir, f'{save_path}/{row.filename}')
+                
+                save_to = f'{save_path}/{row.filename}'
+                if not os.path.exists(save_to):
+                    shutil.copyfile(load_dir, save_to)
                 img_list.append(row.filename)
                 zp_list.append(row.zp_nightly)
                 
