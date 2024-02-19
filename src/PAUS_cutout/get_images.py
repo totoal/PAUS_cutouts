@@ -5,7 +5,7 @@ import pandas as pd
 import sqlalchemy as sqla
 
 import matplotlib.pyplot as plt
-from matplotlib.collections import PatchCollection
+
 from astropy.io import fits
 
 def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
@@ -31,6 +31,9 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
     archivepath_list = []
     filename_list = []
 
+    # Structure of dfs: for each source, stores dictionary for each filter in wl_nb
+    dfs = []
+
     for ra_target, dec_target in zip(RA_list, DEC_list):
         ra_min = ra_target - RA_size/2
         ra_max = ra_target + RA_size/2
@@ -46,7 +49,7 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
             AND NOT ({dec_min} >= i.dec_max OR {dec_max} <= i.dec_min)"""
 
 
-        dfs = []
+        this_df_list = []
         for wl_nb in wl_nbs:
             query = f"""SELECT i.archivepath, i.filename, i.zp_nightly,
                     i.ra_min, i.ra_max, i.dec_min, i.dec_max
@@ -58,11 +61,13 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
                     AND m.production_id=943
                     AND m.kind='RED_SCI'"""
             this_df = pd.read_sql(query, engine)
-            dfs.append(this_df)
+            this_df_list.append(this_df)
         
             # Add image paths to the download list
             archivepath_list += list(this_df.archivepath)
             filename_list += list(this_df.filename)
+
+        dfs.append(this_df_list)
 
     image_list = []
     for ap, fn in zip(archivepath_list, filename_list):
@@ -71,4 +76,4 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
     # This is the list of paths of images to download
     unique_image_list = np.unique(image_list)
 
-    return unique_image_list
+    return unique_image_list, dfs
