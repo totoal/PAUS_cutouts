@@ -22,14 +22,10 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
     try:
         len(NB_wavelength_list)
     except TypeError:
-        wl_nbs = [wl_nbs]
+        NB_wavelength_list = [NB_wavelength_list]
 
     RA_list = np.atleast_1d(RA)
     DEC_list = np.atleast_1d(DEC)
-    
-    # Initialize a couple of arrays
-    archivepath_list = []
-    filename_list = []
 
     # Structure of dfs: for each source, stores dictionary for each filter in wl_nb
     dfs = []
@@ -50,9 +46,7 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
 
 
         this_df_list = []
-        this_archivepath_list = []
-        this_filename_list = []
-        for wl_nb in wl_nbs:
+        for wl_nb in NB_wavelength_list:
             query = f"""SELECT i.archivepath, i.filename, i.zp_nightly,
                     i.ra_min, i.ra_max, i.dec_min, i.dec_max
                     FROM image as i
@@ -70,14 +64,14 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
     return dfs
 
 
-def download_images(dfs, wl_nbs, img_folder):
+def download_images(dfs, NB_wavelength_list, img_folder):
     '''
     Downloads the images and stores them in separate folders by NB.
     '''
     os.makedirs(f'{img_folder}', exist_ok=True)
 
     for _, df_list in enumerate(dfs):
-        for i, wavelength in enumerate(wl_nbs):
+        for i, wavelength in enumerate(NB_wavelength_list):
             save_path = f'{img_folder}/{wavelength}'
             img_list = []
             zp_list = []
@@ -99,7 +93,7 @@ def download_images(dfs, wl_nbs, img_folder):
 
 
 if __name__ == '__main__':
-    wl_nbs = [625, 835]
-    dfs = get_image_list([35], [-5], 0.1, 0.1, wl_nbs) # testing
+    NB_wavelength_list = [625, 835]
+    dfs = get_image_list([35], [-5], 0.1, 0.1, NB_wavelength_list) # testing
 
-    download_images(dfs, wl_nbs, 'test_images')
+    download_images(dfs, NB_wavelength_list, 'test_images')
