@@ -76,7 +76,7 @@ def download_images(dfs, wl_nbs, img_folder):
     '''
     os.makedirs(f'{img_folder}', exist_ok=True)
 
-    for j, df_list in enumerate(dfs):
+    for _, df_list in enumerate(dfs):
         for i, wavelength in enumerate(wl_nbs):
             save_path = f'{img_folder}/{wavelength}'
             img_list = []
@@ -96,3 +96,10 @@ def download_images(dfs, wl_nbs, img_folder):
                 
             with open(f'{save_path}/zero_points.txt', 'w') as writer:
                 [writer.write(f'{zp}\n') for zp in zp_list]
+
+
+if __name__ == '__main__':
+    wl_nbs = [625, 835]
+    dfs = get_image_list([35], [-5], 0.1, 0.1, wl_nbs) # testing
+
+    download_images(dfs, wl_nbs, 'test_images')
