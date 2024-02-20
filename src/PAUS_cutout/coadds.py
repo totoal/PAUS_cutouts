@@ -3,6 +3,12 @@ import sqlalchemy as sqla
 import os
 import shutil
 
+from astropy.io import fits
+from astropy.nddata import Cutout2D
+from astropy.coordinates import SkyCoord
+from astropy.wcs import WCS
+
+
 def get_images_info(RA, DEC, RA_size, DEC_size, NB_wavelength,
                     fully_contained_only=False):
     # Establish connection with database
@@ -55,10 +61,27 @@ def copy_images_to_home(df, save_path):
         zp_list.append(row.zp_nightly)
         
     with open(f'{save_path}/img_list.txt', 'w') as writer:
-        [writer.write(f'{img_name}\n') for img_name in img_list]
+        [writer.write(f'{save_path}/{img_name}\n') for img_name in img_list]
         
     with open(f'{save_path}/zero_points.txt', 'w') as writer:
         [writer.write(f'{zp}\n') for zp in zp_list]
+
+        
+
+def crop_images(df, RA, DEC, cutout_square_size, savepath):
+    for fname in df.filename:
+        hdul = fits.open(f'{savepath}/{fname}')
+        img = hdul[0].data
+        coords = SkyCoord(RA, DEC, unit='deg')
+        wcs = WCS(hdul[0])
+
+        cutout = Cutout2D(img, coords, size=cutout_square_size, wcs=wcs)
+
+        cutout_hdu = hdul[0]
+        cutout_hdu.data = cutout.data
+        cutout_hdu.header.update(cutout.wcs.to_header())
+        cutout_hdu.writeto(f'{savepath}/{fname}', overwrite=True)
+        
 
 if __name__ == '__main__':
     get_images_info(35, -5, 0.002, 0.002, 555)
