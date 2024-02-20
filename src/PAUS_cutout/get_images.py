@@ -93,7 +93,16 @@ def download_images(dfs, NB_wavelength_list, img_folder):
 
 
 if __name__ == '__main__':
-    NB_wavelength_list = [625, 835]
-    dfs = get_image_list([35], [-5], 0.1, 0.1, NB_wavelength_list) # testing
+    NB_wavelength_list = [455, 465, 475, 485, 495, 505,
+                          515, 525, 535, 545, 555, 565,
+                          575, 585, 595, 605, 615, 625,
+                          635]
+    LAE_selection = pd.read_csv('~/LAE_selection_200224.csv')
+    RA = LAE_selection.RA
+    DEC = LAE_selection.DEC
 
-    download_images(dfs, NB_wavelength_list, 'test_images')
+    RA_size = 10 / 3600
+    DEC_size = 10 / 3600
+
+    dfs = get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list) # testing
+    download_images(dfs, NB_wavelength_list, '~/PAUS_images')
