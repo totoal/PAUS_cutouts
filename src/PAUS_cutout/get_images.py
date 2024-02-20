@@ -28,8 +28,7 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
     dfs = []
 
     for iii, (ra_target, dec_target) in enumerate(zip(RA_list, DEC_list)):
-        print(f'Retrieving image info: {iii + 1} / {len(RA_list)}',
-                end='\r')
+        print(f'Retrieving image info: {iii + 1} / {len(RA_list)}')
 
         ra_min = ra_target - RA_size/2
         ra_max = ra_target + RA_size/2
@@ -117,6 +116,10 @@ if __name__ == '__main__':
                           575, 585, 595, 605, 615, 625,
                           635]
     LAE_selection = pd.read_csv('~/LAE_selection_200224.csv')
+    
+    # Mask subset
+    LAE_selection = LAE_selection[LAE_selection['nice_lya']]
+
     RA = LAE_selection.RA
     DEC = LAE_selection.DEC
 
