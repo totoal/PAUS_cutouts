@@ -75,7 +75,8 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath):
         coords = SkyCoord(RA, DEC, unit='deg')
         wcs = WCS(hdul[0])
 
-        cutout = Cutout2D(img, coords, size=cutout_square_size, wcs=wcs)
+        cutout = Cutout2D(img, coords, size=cutout_square_size * 2,
+                          wcs=wcs, mode='partial')
 
         cutout_hdu = hdul[0]
         cutout_hdu.data = cutout.data
