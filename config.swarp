@@ -26,13 +26,13 @@ COMBINE_TYPE           MEDIAN          # MEDIAN,AVERAGE,MIN,MAX,WEIGHTED,CLIPPED
  
 #-------------------------------- Astrometry ----------------------------------
  
-CELESTIAL_TYPE         NATIVE          # NATIVE, PIXEL, EQUATORIAL,
+CELESTIAL_TYPE         EQUATORIAL          # NATIVE, PIXEL, EQUATORIAL,
                                        # GALACTIC,ECLIPTIC, or SUPERGALACTIC
 PROJECTION_TYPE        TAN             # Any WCS projection code or NONE
 PROJECTION_ERR         0.001           # Maximum projection error (in output
                                        # pixels), or 0 for no approximation
 CENTER_TYPE            ALL             # MANUAL, ALL or MOST
-CENTER         00:00:00.0, +00:00:00.0 # Coordinates of the image center
+# CENTER         00:00:00.0, +00:00:00.0 # Coordinates of the image center
 PIXELSCALE_TYPE        MEDIAN          # MANUAL,FIT,MIN,MAX or MEDIAN
 PIXEL_SCALE            0.0             # Pixel scale
 IMAGE_SIZE             0               # Image size (0 = AUTOMATIC)
@@ -60,7 +60,7 @@ GAIN_DEFAULT           0.0             # Default gain if no FITS keyword found
  
 #--------------------------- Background subtraction ---------------------------
  
-SUBTRACT_BACK          Y               # Subtraction sky background (Y/N)?
+SUBTRACT_BACK          N               # Subtraction sky background (Y/N)?
                                        # (all or for each image)
  
 BACK_TYPE              AUTO            # AUTO or MANUAL
