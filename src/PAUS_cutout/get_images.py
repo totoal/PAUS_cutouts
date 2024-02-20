@@ -27,7 +27,10 @@ def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
     # Structure of dfs: for each source, stores dictionary for each filter in wl_nb
     dfs = []
 
-    for ra_target, dec_target in zip(RA_list, DEC_list):
+    for iii, (ra_target, dec_target) in enumerate(zip(RA_list, DEC_list)):
+        print(f'Retrieving image info: {iii + 1} / {len(RA_list)}',
+                end='\r')
+
         ra_min = ra_target - RA_size/2
         ra_max = ra_target + RA_size/2
         dec_min = dec_target - DEC_size/2
@@ -81,7 +84,10 @@ def download_images(dfs, NB_wavelength_list, img_folder):
                 
                 save_to = f'{save_path}/{row.filename}'
                 if not os.path.exists(save_to):
+                    print(f'Copy: {row.filename}')
                     shutil.copyfile(load_dir, save_to)
+                else:
+                    print(f'Skip: {row.filename}')
                 img_list.append(row.filename)
                 zp_list.append(row.zp_nightly)
                 
