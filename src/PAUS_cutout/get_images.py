@@ -4,9 +4,6 @@ import numpy as np
 import pandas as pd
 import sqlalchemy as sqla
 
-import matplotlib.pyplot as plt
-
-from astropy.io import fits
 
 def get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
                    fully_contained_only=False):
@@ -81,7 +78,10 @@ def download_images(dfs, NB_wavelength_list, img_folder):
 
             for _, row in df.iterrows():
                 load_dir = f'{row.archivepath}/{row.filename}'
-                shutil.copyfile(load_dir, f'{save_path}/{row.filename}')
+                
+                save_to = f'{save_path}/{row.filename}'
+                if not os.path.exists(save_to):
+                    shutil.copyfile(load_dir, save_to)
                 img_list.append(row.filename)
                 zp_list.append(row.zp_nightly)
                 
@@ -91,6 +91,19 @@ def download_images(dfs, NB_wavelength_list, img_folder):
             with open(f'{save_path}/zero_points.txt', 'w') as writer:
                 [writer.write(f'{zp}\n') for zp in zp_list]
 
+def get_images(RA, DEC, RA_size, DEC_size, NB_wavelength_list,
+               savedir='PAUS_images', ID=None):
+    if len(RA) != len(DEC):
+        raise Exception('RA and DEC arrays must have the same size.')
+    
+    # If no ID list is given, make up ids
+    if ID is None:
+        ID = np.arange(len(RA))
+
+    dfs = get_image_list(RA, DEC, RA_size, DEC_size, NB_wavelength_list)
+
+    # Download the images
+    download_images(dfs, NB_wavelength_list, savedir)
 
 if __name__ == '__main__':
     NB_wavelength_list = [455, 465, 475, 485, 495, 505,
