@@ -55,11 +55,6 @@ def copy_images_to_home(df, save_path):
     with open(f'{save_path}/img_list.txt', 'w') as writer:
         [writer.write(f'{save_path}/{img_name}\n') for img_name in img_list]
         
-    weight_filenames = ['.'.join(img_name.split('.')[:-1]) + '.weight.fits'
-                        for img_name in img_list]
-    with open(f'{save_path}/weight_list.txt', 'w') as writer:
-        [writer.write(f'{fn}\n') for fn in weight_filenames]
-        
     with open(f'{save_path}/zero_points.txt', 'w') as writer:
         [writer.write(f'{zp}\n') for zp in zp_list]
 
