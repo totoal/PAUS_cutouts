@@ -7,7 +7,8 @@ from astropy.io import fits
 from astropy.nddata import Cutout2D
 from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
-
+import astropy.units as u
+from astropy.nddata.utils import NoOverlapError
 
 def get_images_info(RA, DEC, RA_size, DEC_size, NB_wavelength,
                     fully_contained_only=False):
@@ -48,15 +49,6 @@ def copy_images_to_home(df, save_path):
     img_list = []
     zp_list = []
     for _, row in df.iterrows():
-        load_dir = f'{row.archivepath}/{row.filename}'
-        
-        save_to = f'{save_path}/{row.filename}'
-        if not os.path.exists(save_to):
-            print(f'Copy: {row.filename}')
-            shutil.copyfile(load_dir, save_to)
-        else:
-            print(f'Skip: {row.filename}')
-
         img_list.append(row.filename)
         zp_list.append(row.zp_nightly)
         
@@ -69,20 +61,20 @@ def copy_images_to_home(df, save_path):
         
 
 def crop_images(df, RA, DEC, cutout_square_size, savepath):
-    for fname in df.filename:
-        hdul = fits.open(f'{savepath}/{fname}')
+    for i, (archivepath, fname) in enumerate(zip(df.archivepath, df.filename)):
+        hdul = fits.open(f'{archivepath}/{fname}')
         img = hdul[0].data
         coords = SkyCoord(RA, DEC, unit='deg')
         wcs = WCS(hdul[0])
-
-        cutout = Cutout2D(img, coords, size=cutout_square_size * 2,
-                          wcs=wcs, mode='partial')
+        
+        try:
+            cutout = Cutout2D(img, coords, size=cutout_square_size * u.deg,
+                              wcs=wcs, mode='trim')
+        except NoOverlapError:
+            print(f'Skipping {fname}, no overlap with desired area.')
 
         cutout_hdu = hdul[0]
         cutout_hdu.data = cutout.data
         cutout_hdu.header.update(cutout.wcs.to_header())
         cutout_hdu.writeto(f'{savepath}/{fname}', overwrite=True)
         
-
-if __name__ == '__main__':
-    get_images_info(35, -5, 0.002, 0.002, 555)
