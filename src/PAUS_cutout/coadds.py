@@ -1,7 +1,6 @@
 import pandas as pd
 import sqlalchemy as sqla
 import os
-import shutil
 
 from astropy.io import fits
 from astropy.nddata import Cutout2D
@@ -10,16 +9,18 @@ from astropy.wcs import WCS
 import astropy.units as u
 from astropy.nddata.utils import NoOverlapError
 
-def get_images_info(RA, DEC, RA_size, DEC_size, NB_wavelength,
+def get_images_info(RA, DEC, square_size, NB_wavelength,
                     fully_contained_only=False):
     # Establish connection with database
     dsn = 'postgresql://readonly:PAUsc1ence@db.pau.pic.es/dm'
     engine = sqla.create_engine(dsn)
 
-    ra_min = RA - RA_size/2
-    ra_max = RA + RA_size/2
-    dec_min = DEC - DEC_size/2
-    dec_max = DEC + DEC_size/2
+    # Search in a larger square because images are not exact
+    # rectangles in RA, DEC
+    ra_min = RA - square_size
+    ra_max = RA + square_size
+    dec_min = DEC - square_size
+    dec_max = DEC + square_size
 
     if fully_contained_only:
         coordinate_conditions = f"""({ra_min} > i.ra_min AND {ra_max} < i.ra_max)
@@ -28,7 +29,6 @@ def get_images_info(RA, DEC, RA_size, DEC_size, NB_wavelength,
     else:
         coordinate_conditions = f"""NOT ({ra_min} >= i.ra_max OR {ra_max} <= i.ra_min)
         AND NOT ({dec_min} >= i.dec_max OR {dec_max} <= i.dec_min)"""
-
 
     query = f"""SELECT i.archivepath, i.filename, i.zp_nightly,
             i.ra_min, i.ra_max, i.dec_min, i.dec_max
@@ -39,6 +39,7 @@ def get_images_info(RA, DEC, RA_size, DEC_size, NB_wavelength,
             AND i.wavelength={NB_wavelength}
             AND m.production_id=943
             AND m.kind='RED_SCI'"""
+    
     df = pd.read_sql(query, engine)
 
     return df
@@ -60,8 +61,12 @@ def copy_images_to_home(df, save_path):
 
         
 
-def crop_images(df, RA, DEC, cutout_square_size, savepath):
+def crop_images(df, RA, DEC, cutout_square_size, savepath,
+                suffix=''):
+    excluded_images = []
     for i, (archivepath, fname) in enumerate(zip(df.archivepath, df.filename)):
+        fname = '.'.join(fname.split('.')[:-1]) + f'{suffix}.fits'
+        
         hdul = fits.open(f'{archivepath}/{fname}')
         img = hdul[0].data
         coords = SkyCoord(RA, DEC, unit='deg')
@@ -70,11 +75,13 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath):
         try:
             cutout = Cutout2D(img, coords, size=cutout_square_size * u.deg,
                               wcs=wcs, mode='trim')
+            cutout_hdu = hdul[0]
+            cutout_hdu.data = cutout.data
+            cutout_hdu.header.update(cutout.wcs.to_header())
+            cutout_hdu.writeto(f'{savepath}/{fname}', overwrite=True)
+        
         except NoOverlapError:
             print(f'Skipping {fname}, no overlap with desired area.')
-
-        cutout_hdu = hdul[0]
-        cutout_hdu.data = cutout.data
-        cutout_hdu.header.update(cutout.wcs.to_header())
-        cutout_hdu.writeto(f'{savepath}/{fname}', overwrite=True)
-        
+            excluded_images.append(i)
+    
+    return excluded_images
