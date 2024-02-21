@@ -10,7 +10,7 @@ HEADER_SUFFIX          .head           # Filename extension for additional heade
  
 #------------------------------- Input Weights --------------------------------
  
-WEIGHT_TYPE            NONE            # BACKGROUND,MAP_RMS,MAP_VARIANCE
+WEIGHT_TYPE            MAP_WEIGHT            # BACKGROUND,MAP_RMS,MAP_VARIANCE
                                        # or MAP_WEIGHT
 WEIGHT_SUFFIX          .weight.fits    # Suffix to use for weight-maps
 WEIGHT_IMAGE                           # Weightmap filename if suffix not used
@@ -19,7 +19,7 @@ WEIGHT_IMAGE                           # Weightmap filename if suffix not used
 #------------------------------- Co-addition ----------------------------------
  
 COMBINE                Y               # Combine resampled images (Y/N)?
-COMBINE_TYPE           MEDIAN          # MEDIAN,AVERAGE,MIN,MAX,WEIGHTED,CLIPPED
+COMBINE_TYPE           WEIGHTED          # MEDIAN,AVERAGE,MIN,MAX,WEIGHTED,CLIPPED
                                        # CHI-OLD,CHI-MODE,CHI-MEAN,SUM,
                                        # WEIGHTED_WEIGHT,MEDIAN_WEIGHT,
                                        # AND,NAND,OR or NOR
@@ -40,7 +40,7 @@ IMAGE_SIZE             0               # Image size (0 = AUTOMATIC)
 #-------------------------------- Resampling ----------------------------------
  
 RESAMPLE               Y               # Resample input images (Y/N)?
-RESAMPLE_DIR           .               # Directory path for resampled images
+RESAMPLE_DIR           .tmp_files_coadds               # Directory path for resampled images
 RESAMPLE_SUFFIX        .resamp.fits    # filename extension for resampled images
  
 RESAMPLING_TYPE        LANCZOS3        # NEAREST,BILINEAR,LANCZOS2,LANCZOS3
@@ -51,7 +51,7 @@ INTERPOLATE            N               # Interpolate bad input pixels (Y/N)?
                                        # (all or for each image)
  
 FSCALASTRO_TYPE        FIXED           # NONE,FIXED, or VARIABLE
-FSCALE_KEYWORD         FLXSCALE        # FITS keyword for the multiplicative
+# FSCALE_KEYWORD         FLXSCALE        # FITS keyword for the multiplicative
                                        # factor applied to each input image
 FSCALE_DEFAULT         1.0             # Default FSCALE value if not in header
  
