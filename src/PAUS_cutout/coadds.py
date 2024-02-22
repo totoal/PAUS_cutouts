@@ -14,8 +14,6 @@ from astropy.wcs import WCS
 import astropy.units as u
 from astropy.nddata.utils import NoOverlapError
 
-from .coadds import *
-
 
 def get_images_info(RA, DEC, square_size, NB_wavelength,
                     fully_contained_only=False):
@@ -143,7 +141,6 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             
             # Remove excluded images from list
             if len(excluded_images) > 0:
-                print(excluded_images)
                 with open(f'{tmp_files_dir}/img_list.txt', 'r') as file:
                     img_list_lines = file.readlines()
                     
