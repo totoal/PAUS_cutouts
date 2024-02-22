@@ -9,6 +9,8 @@ from astropy.wcs import WCS
 import astropy.units as u
 from astropy.nddata.utils import NoOverlapError
 
+import numpy as np
+
 def get_images_info(RA, DEC, square_size, NB_wavelength,
                     fully_contained_only=False):
     # Establish connection with database
@@ -72,6 +74,10 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
         coords = SkyCoord(RA, DEC, unit='deg')
         wcs = WCS(hdul[0])
         
+        # Check if (RA,DEC) position is contained in the wcs of the image
+        if not coords.contained_by(wcs, image=img):
+            print(f'Skipping {fname}}: Coordinates not contained in the image.')
+        
         try:
             cutout = Cutout2D(img, coords, size=cutout_square_size * u.deg,
                               wcs=wcs, mode='trim')
@@ -81,7 +87,11 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
             cutout_hdu.writeto(f'{savepath}/{fname}', overwrite=True)
         
         except NoOverlapError:
-            print(f'Skipping {fname}, no overlap with desired area.')
+            print(f'Skipping {fname}: no overlap with desired area.')
             excluded_images.append(i)
+        else:
+            if not np.all(cutout.data.shape):
+                print(f'Skipping {fname}: Cutout has zero dimension.')
+                excluded_images.append(i)
     
     return excluded_images
