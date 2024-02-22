@@ -122,7 +122,8 @@ def rm_tmp_dir(func):
 @rm_tmp_dir
 def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                              NB_wav_Arr, tmp_files_dir='tmp_files_cutouts',
-                             save_coadds_dir='out_cutouts'):
+                             save_coadds_dir='out_cutouts',
+                            config_template='config.swarp'):
     for NB_wav in NB_wav_Arr:
         save_coadds_to = f'{save_coadds_dir}/NB{int(NB_wav)}'
         os.makedirs(save_coadds_to, exist_ok=True)
@@ -151,7 +152,6 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                         if i not in excluded_images:
                             file.write(line)
             ### Generate new Swarp config file from template
-            config_template = '/nfs/pic.es/user/a/atorralb/PAUS_cutouts/config.swarp'
             with open(config_template, 'r') as file:
                 filedata = file.read()
                 
