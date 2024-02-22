@@ -75,9 +75,11 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
         wcs = WCS(hdul[0])
         
         # Check if (RA,DEC) position is contained in the wcs of the image
-        if not coords.contained_by(wcs, image=img):
-            print(f'Skipping {fname}}: Coordinates not contained in the image.')
-        
+        if coords.contained_by(wcs, image=img):
+            print(f'Skipping {fname}: Coordinates not contained in the image.')
+            excluded_images.append(i)
+            continue
+            
         try:
             cutout = Cutout2D(img, coords, size=cutout_square_size * u.deg,
                               wcs=wcs, mode='trim')
@@ -85,13 +87,12 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
             cutout_hdu.data = cutout.data
             cutout_hdu.header.update(cutout.wcs.to_header())
             cutout_hdu.writeto(f'{savepath}/{fname}', overwrite=True)
-        
         except NoOverlapError:
             print(f'Skipping {fname}: no overlap with desired area.')
             excluded_images.append(i)
-        else:
-            if not np.all(cutout.data.shape):
-                print(f'Skipping {fname}: Cutout has zero dimension.')
-                excluded_images.append(i)
+        
+        if not np.all(cutout.data.shape):
+            print(f'Skipping {fname}: Cutout has zero dimension.')
+            excluded_images.append(i)
     
     return excluded_images
