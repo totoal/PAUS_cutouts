@@ -75,7 +75,7 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
         wcs = WCS(hdul[0])
         
         # Check if (RA,DEC) position is contained in the wcs of the image
-        if coords.contained_by(wcs, image=img):
+        if not coords.contained_by(wcs, image=img):
             print(f'Skipping {fname}: Coordinates not contained in the image.')
             excluded_images.append(i)
             continue
