@@ -90,6 +90,7 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
         except NoOverlapError:
             print(f'Skipping {fname}: no overlap with desired area.')
             excluded_images.append(i)
+            continue
         
         if not np.all(cutout.data.shape):
             print(f'Skipping {fname}: Cutout has zero dimension.')
