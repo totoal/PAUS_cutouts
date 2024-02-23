@@ -124,6 +124,11 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                              NB_wav_Arr, tmp_files_dir='tmp_files_cutouts',
                              save_coadds_dir='out_cutouts',
                              config_template='config.swarp'):
+    RA_Arr = np.atleast1d(RA_Arr)
+    DEC_Arr = np.atleast1d(DEC_Arr)
+    ID_Arr = np.atleast1d(ID_Arr)
+    NB_wav_Arr = np.atleast1d(NB_wav_Arr)
+    
     for NB_wav in NB_wav_Arr:
         save_coadds_to = f'{save_coadds_dir}/NB{int(NB_wav)}'
         os.makedirs(save_coadds_to, exist_ok=True)
