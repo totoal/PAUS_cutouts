@@ -143,7 +143,11 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
     tmp_files_dir : Directory path for temporary files. Defaults to 'tmp_files_cutouts'.
     save_coadds_dir : Directory path to save coadds. Defaults to 'out_cutouts'.
     config_template : Template for Swarp config file. Defaults to 'config.swarp'.
-    combine_NBs: If True, combines the images of all the NBs specified in NB_wav_Arr. If False, produces one image for every NB.
+    
+    NOTE: NB_wav_Arr can be:
+        - Single integer: Make coadds for single NB
+        - List of integers: Make coadds for all the NBs in the list
+        - List of lists of integers: Make coadds for the combined NBs in each nested list.
 
     Returns:
     None
