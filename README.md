@@ -18,3 +18,5 @@ The main function can be imported as
 	from PAUS_cutout.coadds import generate_coadded_cutouts
 
 See docstring for more info.
+
+A template of config.swarp is included in this repository. Copy it to your working directory, or use your own template.
