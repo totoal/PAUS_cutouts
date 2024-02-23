@@ -50,7 +50,7 @@ def get_images_info(RA, DEC, square_size, NB_wavelength,
 
     return df
 
-def copy_images_to_dir(df, save_path):
+def generate_image_list(df, save_path):
     os.makedirs(save_path, exist_ok=True)
     
     img_list = []
@@ -159,7 +159,7 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             df = get_images_info(RA, DEC, square_size, NB_wav)
 
             # Copy images to temporary directory
-            copy_images_to_home(df, tmp_files_dir)
+            generate_image_list(df, tmp_files_dir)
 
             # Crop images
             excluded_images = crop_images(df, RA, DEC, square_size,
