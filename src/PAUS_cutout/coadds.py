@@ -123,7 +123,7 @@ def rm_tmp_dir(func):
 def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                              NB_wav_Arr, tmp_files_dir='tmp_files_cutouts',
                              save_coadds_dir='out_cutouts',
-                            config_template='config.swarp'):
+                             config_template='config.swarp'):
     for NB_wav in NB_wav_Arr:
         save_coadds_to = f'{save_coadds_dir}/NB{int(NB_wav)}'
         os.makedirs(save_coadds_to, exist_ok=True)
