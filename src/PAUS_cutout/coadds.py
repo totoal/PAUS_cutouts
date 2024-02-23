@@ -50,7 +50,7 @@ def get_images_info(RA, DEC, square_size, NB_wavelength,
 
     return df
 
-def copy_images_to_home(df, save_path):
+def copy_images_to_dir(df, save_path):
     os.makedirs(save_path, exist_ok=True)
     
     img_list = []
