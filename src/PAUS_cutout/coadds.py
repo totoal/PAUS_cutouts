@@ -15,7 +15,7 @@ import astropy.units as u
 from astropy.nddata.utils import NoOverlapError
 
 
-def get_images_info(RA, DEC, square_size, NB_wavelength,
+def get_images_info(RA, DEC, square_size, NB_wav_Arr,
                     fully_contained_only=False):
     # Establish connection with database
     dsn = 'postgresql://readonly:PAUsc1ence@db.pau.pic.es/dm'
@@ -28,27 +28,29 @@ def get_images_info(RA, DEC, square_size, NB_wavelength,
     dec_min = DEC - square_size
     dec_max = DEC + square_size
 
-    if fully_contained_only:
-        coordinate_conditions = f"""({ra_min} > i.ra_min AND {ra_max} < i.ra_max)
-        AND ({dec_min} > i.dec_min AND {dec_max} < i.dec_max)"""
+    df_list = []
+    for NB_wav in np.atleast_1d(NB_wav_Arr):
+        if fully_contained_only:
+            coordinate_conditions = f"""({ra_min} > i.ra_min AND {ra_max} < i.ra_max)
+            AND ({dec_min} > i.dec_min AND {dec_max} < i.dec_max)"""
 
-    else:
-        coordinate_conditions = f"""NOT ({ra_min} >= i.ra_max OR {ra_max} <= i.ra_min)
-        AND NOT ({dec_min} >= i.dec_max OR {dec_max} <= i.dec_min)"""
+        else:
+            coordinate_conditions = f"""NOT ({ra_min} >= i.ra_max OR {ra_max} <= i.ra_min)
+            AND NOT ({dec_min} >= i.dec_max OR {dec_max} <= i.dec_min)"""
 
-    query = f"""SELECT i.archivepath, i.filename, i.zp_nightly,
-            i.ra_min, i.ra_max, i.dec_min, i.dec_max
-            FROM image as i
-            JOIN mosaic as m
-            ON i.mosaic_id = m.id
-            WHERE {coordinate_conditions}
-            AND i.wavelength={NB_wavelength}
-            AND m.production_id=943
-            AND m.kind='RED_SCI'"""
+        query = f"""SELECT i.archivepath, i.filename, i.zp_nightly,
+                i.ra_min, i.ra_max, i.dec_min, i.dec_max
+                FROM image as i
+                JOIN mosaic as m
+                ON i.mosaic_id = m.id
+                WHERE {coordinate_conditions}
+                AND i.wavelength={NB_wav}
+                AND m.production_id=943
+                AND m.kind='RED_SCI'"""
     
-    df = pd.read_sql(query, engine)
+        df_list.append(pd.read_sql(query, engine))
 
-    return df
+    return pd.concat(df_list)
 
 def generate_image_list(df, save_path):
     os.makedirs(save_path, exist_ok=True)
@@ -141,6 +143,7 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
     tmp_files_dir : Directory path for temporary files. Defaults to 'tmp_files_cutouts'.
     save_coadds_dir : Directory path to save coadds. Defaults to 'out_cutouts'.
     config_template : Template for Swarp config file. Defaults to 'config.swarp'.
+    combine_NBs: If True, combines the images of all the NBs specified in NB_wav_Arr. If False, produces one image for every NB.
 
     Returns:
     None
@@ -150,10 +153,16 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
     ID_Arr = np.atleast_1d(ID_Arr)
     NB_wav_Arr = np.atleast_1d(NB_wav_Arr)
     
+            
     for NB_wav in NB_wav_Arr:
-        save_coadds_to = f'{save_coadds_dir}/NB{int(NB_wav)}'
-        os.makedirs(save_coadds_to, exist_ok=True)
-        
+        if len(np.atleast_1d(NB_wav)) > 1:
+            save_coadds_to = f'{save_coadds_dir}/NB' + '_'.join(NB_wav.astype(str))
+            os.makedirs(save_coadds_to, exist_ok=True)
+        else:
+            for NB_wav in NB_wav_Arr:
+                save_coadds_to = f'{save_coadds_dir}/NB{int(NB_wav)}'
+                os.makedirs(save_coadds_to, exist_ok=True)
+                
         for RA, DEC, ID in zip(RA_Arr, DEC_Arr, ID_Arr):
             print(f'\n\n {RA=}, {DEC=}, {ID=}\n')
             df = get_images_info(RA, DEC, square_size, NB_wav)
@@ -166,12 +175,12 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                                           tmp_files_dir)
             crop_images(df, RA, DEC, square_size, tmp_files_dir,
                         suffix='.weight')
-            
+
             # Remove excluded images from list
             if len(excluded_images) > 0:
                 with open(f'{tmp_files_dir}/img_list.txt', 'r') as file:
                     img_list_lines = file.readlines()
-                    
+
                 with open(f'{tmp_files_dir}/img_list.txt', 'w') as file:
                     for i, line in enumerate(img_list_lines):
                         if i not in excluded_images:
@@ -179,12 +188,12 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             ### Generate new Swarp config file from template
             with open(config_template, 'r') as file:
                 filedata = file.read()
-                
-            out_filename = f'{save_coadds_to}/coadd_cutout_{ID}_NB{NB_wav}.fits'
-            filedata = filedata.replace('coadd.fits', out_filename)
-            out_filename_w = f'{save_coadds_to}/coadd_cutout_{ID}_NB{NB_wav}.weight.fits'
-            filedata = filedata.replace('coadd.weight.fits', out_filename_w)
-           
+
+                out_filename = f'{save_coadds_to}/coadd_cutout_{ID}.fits'
+                filedata = filedata.replace('coadd.fits', out_filename)
+                out_filename_w = f'{save_coadds_to}/coadd_cutout_{ID}.weight.fits'
+                filedata = filedata.replace('coadd.weight.fits', out_filename_w)
+
             with open(f'{tmp_files_dir}/config.swarp', 'w') as file:
                 file.write(filedata)
 
@@ -196,9 +205,9 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             os_out = os.system(f'{swarp_path} @{img_list_path} -c {config_file_path}')
             if os_out != 0:
                 raise Exception(f'Error {os_out}')
-                
+
             # Delete tmp files for this coadd
             tmp_files = glob.glob(f'{tmp_files_dir}/*')
             for f in tmp_files:
                 os.remove(f)
-                
+
