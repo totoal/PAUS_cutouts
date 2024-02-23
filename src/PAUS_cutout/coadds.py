@@ -129,6 +129,22 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                              NB_wav_Arr, tmp_files_dir='tmp_files_cutouts',
                              save_coadds_dir='out_cutouts',
                              config_template='config.swarp'):
+        """
+    Generate coadded cutouts for given RA, DEC coordinates and ID with specific square size and narrowband wavelength using SWarp.
+
+    Parameters:
+    RA_Arr : Array of Right Ascension (RA) coordinates in deg.
+    DEC_Arr : Array of Declination (DEC) coordinates in deg.
+    ID_Arr : Array of IDs of objects used to generate file names.
+    square_size : Size of the square cutout in deg.
+    NB_wav_Arr : Array of narrowband wavelength identificator (integer).
+    tmp_files_dir : Directory path for temporary files. Defaults to 'tmp_files_cutouts'.
+    save_coadds_dir : Directory path to save coadds. Defaults to 'out_cutouts'.
+    config_template : Template for Swarp config file. Defaults to 'config.swarp'.
+
+    Returns:
+    None
+    """
     RA_Arr = np.atleast_1d(RA_Arr)
     DEC_Arr = np.atleast_1d(DEC_Arr)
     ID_Arr = np.atleast_1d(ID_Arr)
