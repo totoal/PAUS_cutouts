@@ -3,7 +3,7 @@ Python package for generating coadded cutouts of PAUS images. This package is de
 
 ## Installation
 - Python >=3.11 recommended.
--  Install the dependencies: pandas, numpy, sqlalchemy, astropy
+-  Install the dependencies: pandas, numpy, sqlalchemy, astropy, psycopg2
 - Clone this repository:
 
 		git clone https://github.com/totoal/PAUS_cutouts
