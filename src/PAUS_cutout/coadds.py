@@ -111,9 +111,11 @@ def rm_tmp_dir(func):
         
         try:
             func(*args)
-        finally:
+        except:
             shutil.rmtree(tmp_files_dir)
             raise
+        finally:
+            shutil.rmtree(tmp_files_dir)
         
     return inner
 
