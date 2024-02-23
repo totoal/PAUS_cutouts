@@ -104,18 +104,23 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
 
 
 def rm_tmp_dir(func):
-    def inner(*args):
-        tmp_files_dir = args[-1]
+    def inner(*args, **kwargs):
+        if 'tmp_files_dir' in kwargs.keys():
+            tmp_files_dir = kwargs['tmp_files_dir']
+        elif len(args) > 5:
+            tmp_files_dir = args[5]
+        else:
+            tmp_files_dir = 'tmp_files_cutouts'
+            
         # Never set exist_ok=True or very bad things could happen !!
         os.makedirs(tmp_files_dir, exist_ok=False)
         
         try:
-            func(*args)
+            func(*args, **kwargs)
+            shutil.rmtree(tmp_files_dir)
         except:
             shutil.rmtree(tmp_files_dir)
-            raise
-        finally:
-            shutil.rmtree(tmp_files_dir)
+            raise            
         
     return inner
 
@@ -124,10 +129,10 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                              NB_wav_Arr, tmp_files_dir='tmp_files_cutouts',
                              save_coadds_dir='out_cutouts',
                              config_template='config.swarp'):
-    RA_Arr = np.atleast1d(RA_Arr)
-    DEC_Arr = np.atleast1d(DEC_Arr)
-    ID_Arr = np.atleast1d(ID_Arr)
-    NB_wav_Arr = np.atleast1d(NB_wav_Arr)
+    RA_Arr = np.atleast_1d(RA_Arr)
+    DEC_Arr = np.atleast_1d(DEC_Arr)
+    ID_Arr = np.atleast_1d(ID_Arr)
+    NB_wav_Arr = np.atleast_1d(NB_wav_Arr)
     
     for NB_wav in NB_wav_Arr:
         save_coadds_to = f'{save_coadds_dir}/NB{int(NB_wav)}'
@@ -141,9 +146,9 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             copy_images_to_home(df, tmp_files_dir)
 
             # Crop images
-            excluded_images = crop_images(df, RA, DEC,cutout_square_size,
+            excluded_images = crop_images(df, RA, DEC, square_size,
                                           tmp_files_dir)
-            crop_images(df, RA, DEC, cutout_square_size, tmp_files_dir,
+            crop_images(df, RA, DEC, square_size, tmp_files_dir,
                         suffix='.weight')
             
             # Remove excluded images from list
