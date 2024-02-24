@@ -15,7 +15,7 @@ import astropy.units as u
 from astropy.nddata.utils import NoOverlapError
 
 
-def get_images_info(RA, DEC, square_size, NB_wav_Arr,
+def get_images_info(RA, DEC, NB_wav_Arr, search_size=0.05,
                     fully_contained_only=False):
     # Establish connection with database
     dsn = 'postgresql://readonly:PAUsc1ence@db.pau.pic.es/dm'
@@ -23,10 +23,10 @@ def get_images_info(RA, DEC, square_size, NB_wav_Arr,
 
     # Search in a larger square because images are not exact
     # rectangles in RA, DEC
-    ra_min = RA - square_size
-    ra_max = RA + square_size
-    dec_min = DEC - square_size
-    dec_max = DEC + square_size
+    ra_min = RA - search_size
+    ra_max = RA + search_size
+    dec_min = DEC - search_size
+    dec_max = DEC + search_size
 
     df_list = []
     for NB_wav in np.atleast_1d(NB_wav_Arr):
@@ -169,7 +169,7 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                 
         for RA, DEC, ID in zip(RA_Arr, DEC_Arr, ID_Arr):
             print(f'\n\n {RA=}, {DEC=}, {ID=}\n')
-            df = get_images_info(RA, DEC, square_size, NB_wav)
+            df = get_images_info(RA, DEC, NB_wav)
 
             # Copy images to temporary directory
             generate_image_list(df, tmp_files_dir)
