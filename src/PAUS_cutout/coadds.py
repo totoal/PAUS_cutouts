@@ -164,9 +164,8 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             save_coadds_to = f'{save_coadds_dir}/NB' + '_'.join(NB_wav.astype(str))
             os.makedirs(save_coadds_to, exist_ok=True)
         else:
-            for NB_wav in NB_wav_Arr:
-                save_coadds_to = f'{save_coadds_dir}/NB{int(NB_wav)}'
-                os.makedirs(save_coadds_to, exist_ok=True)
+            save_coadds_to = f'{save_coadds_dir}/NB{int(NB_wav)}'
+            os.makedirs(save_coadds_to, exist_ok=True)
                 
         for RA, DEC, ID in zip(RA_Arr, DEC_Arr, ID_Arr):
             print(f'\n\n {RA=}, {DEC=}, {ID=}\n')
