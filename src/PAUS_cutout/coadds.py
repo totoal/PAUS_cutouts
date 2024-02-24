@@ -155,8 +155,9 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
     RA_Arr = np.atleast_1d(RA_Arr)
     DEC_Arr = np.atleast_1d(DEC_Arr)
     ID_Arr = np.atleast_1d(ID_Arr)
-    NB_wav_Arr = np.atleast_1d(NB_wav_Arr)
     
+    if isinstance(NB_wav_Arr, int):
+        NB_wav_Arr = np.atleast_1d(NB_wav_Arr)
             
     for NB_wav in NB_wav_Arr:
         if len(np.atleast_1d(NB_wav)) > 1:
