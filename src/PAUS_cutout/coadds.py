@@ -33,7 +33,7 @@ def get_images_info(RA, DEC, NB_wav_Arr, search_size=0.05,
         if fully_contained_only:
             coordinate_conditions = f"""({ra_min} > i.ra_min AND {ra_max} < i.ra_max)
             AND ({dec_min} > i.dec_min AND {dec_max} < i.dec_max)"""
-
+            
         else:
             coordinate_conditions = f"""NOT ({ra_min} >= i.ra_max OR {ra_max} <= i.ra_min)
             AND NOT ({dec_min} >= i.dec_max OR {dec_max} <= i.dec_min)"""
@@ -60,7 +60,7 @@ def generate_image_list(df, save_path):
     for _, row in df.iterrows():
         img_list.append(row.filename)
         zp_list.append(row.zp_nightly)
-        
+                
     with open(f'{save_path}/img_list.txt', 'w') as writer:
         [writer.write(f'{save_path}/{img_name}\n') for img_name in img_list]
         
@@ -203,10 +203,11 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
 
             # Run swarp
             img_list_path = f'{tmp_files_dir}/img_list.txt'
+            zp_list_path = f'{tmp_files_dir}/zero_points.txt'
             config_file_path = f'{tmp_files_dir}/config.swarp'
             swarp_path = '/data/astro/software/centos7/swarp/2.41.5/bin/swarp'
 
-            os_out = os.system(f'{swarp_path} @{img_list_path} -c {config_file_path}')
+            os_out = os.system(f'{swarp_path} @{img_list_path} -c {config_file_path} -FSCALE_DEFAULT @{zp_list_path} -FSCALE_KEYWORD "nokeyword"')
             if os_out != 0:
                 raise Exception(f'Error {os_out}')
 
