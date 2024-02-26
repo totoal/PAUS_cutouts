@@ -16,7 +16,7 @@ Python package for generating coadded cutouts of PAUS images. This package is de
 ## Use
 The main function can be imported as
 
-	from PAUS_cutout.coadds import generate_coadded_cutouts
+	from PAUS_cutouts.coadds import generate_coadded_cutouts
 
 See docstring for more info.
 
