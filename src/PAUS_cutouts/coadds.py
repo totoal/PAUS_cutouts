@@ -184,11 +184,18 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             if len(excluded_images) > 0:
                 with open(f'{tmp_files_dir}/img_list.txt', 'r') as file:
                     img_list_lines = file.readlines()
-
                 with open(f'{tmp_files_dir}/img_list.txt', 'w') as file:
                     for i, line in enumerate(img_list_lines):
                         if i not in excluded_images:
                             file.write(line)
+                
+                with open(f'{tmp_files_dir}/zero_points.txt', 'r') as file:
+                    zp_list_lines = file.readlines()
+                with open(f'{tmp_files_dir}/zero_points.txt', 'w') as file:
+                    for i, line in enumerate(zp_list_lines):
+                        if i not in excluded_images:
+                            file.write(line)
+                            
             ### Generate new Swarp config file from template
             with open(config_template, 'r') as file:
                 filedata = file.read()
