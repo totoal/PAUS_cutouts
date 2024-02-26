@@ -88,7 +88,7 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
             
         try:
             cutout = Cutout2D(img, coords, size=cutout_square_size * u.deg,
-                              wcs=wcs, mode='trim')
+                              wcs=wcs, mode='partial', fill_value=0)
             cutout_hdu = hdul[0]
             cutout_hdu.data = cutout.data
             cutout_hdu.header.update(cutout.wcs.to_header())
