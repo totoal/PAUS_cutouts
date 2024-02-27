@@ -179,6 +179,13 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                                           tmp_files_dir)
             crop_images(df, RA, DEC, square_size, tmp_files_dir,
                         suffix='.weight')
+            
+            # Read zero point list file to check if there is any nans
+            with open(f'{tmp_files_dir}/zero_points.txt', 'r') as file:
+                    zp_list_lines = file.readlines()
+            for i, line in enumerate(zp_list_lines):
+                if line[:3] == 'nan':
+                    excluded_images.append(i)
 
             # Remove excluded images from list
             if len(excluded_images) > 0:
@@ -189,8 +196,6 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                         if i not in excluded_images:
                             file.write(line)
                 
-                with open(f'{tmp_files_dir}/zero_points.txt', 'r') as file:
-                    zp_list_lines = file.readlines()
                 with open(f'{tmp_files_dir}/zero_points.txt', 'w') as file:
                     for i, line in enumerate(zp_list_lines):
                         if i not in excluded_images:
