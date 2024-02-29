@@ -130,7 +130,8 @@ def rm_tmp_dir(func):
 def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                              NB_wav_Arr, tmp_files_dir='tmp_files_cutouts',
                              save_coadds_dir='out_cutouts',
-                             config_template='config.swarp'):
+                             config_template='config.swarp',
+                             combine_type='AVERAGE'):
     """
     Generate coadded cutouts for given RA, DEC coordinates and ID with specific square size and narrowband wavelength using SWarp.
 
@@ -204,11 +205,12 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             ### Generate new Swarp config file from template
             with open(config_template, 'r') as file:
                 filedata = file.read()
-
                 out_filename = f'{save_coadds_to}/coadd_cutout_{ID}.fits'
                 filedata = filedata.replace('coadd.fits', out_filename)
                 out_filename_w = f'{save_coadds_to}/coadd_cutout_{ID}.weight.fits'
                 filedata = filedata.replace('coadd.weight.fits', out_filename_w)
+                out_filename_w = f'{save_coadds_to}/coadd_cutout_{ID}.weight.fits'
+                filedata = filedata.replace('combinetype_cutouts', combine_type)
 
             with open(f'{tmp_files_dir}/config.swarp', 'w') as file:
                 file.write(filedata)

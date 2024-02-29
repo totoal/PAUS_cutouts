@@ -19,10 +19,10 @@ WEIGHT_IMAGE                           # Weightmap filename if suffix not used
 #------------------------------- Co-addition ----------------------------------
  
 COMBINE                Y               # Combine resampled images (Y/N)?
-COMBINE_TYPE           WEIGHTED          # MEDIAN,AVERAGE,MIN,MAX,WEIGHTED,CLIPPED
-                                       # CHI-OLD,CHI-MODE,CHI-MEAN,SUM,
-                                       # WEIGHTED_WEIGHT,MEDIAN_WEIGHT,
-                                       # AND,NAND,OR or NOR
+COMBINE_TYPE           combinetype_cutouts          # MEDIAN,AVERAGE,MIN,MAX,WEIGHTED,CLIPPED
+                                                    # CHI-OLD,CHI-MODE,CHI-MEAN,SUM,
+                                                    # WEIGHTED_WEIGHT,MEDIAN_WEIGHT,
+                                                    # AND,NAND,OR or NOR
  
 #-------------------------------- Astrometry ----------------------------------
  
@@ -87,7 +87,7 @@ COPY_KEYWORDS          OBJECT          # List of FITS keywords to propagate
                                        # from the input to the output headers
 WRITE_FILEINFO         N               # Write information about each input
                                        # file in the output image header?
-WRITE_XML              Y               # Write XML file (Y/N)?
+WRITE_XML              N               # Write XML file (Y/N)?
 XML_NAME               swarp.xml       # Filename for XML output
 VERBOSE_TYPE           NORMAL          # QUIET,LOG,NORMAL, or FULL
  
