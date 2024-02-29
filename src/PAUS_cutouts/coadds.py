@@ -144,6 +144,7 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
     tmp_files_dir : Directory path for temporary files. Defaults to 'tmp_files_cutouts'.
     save_coadds_dir : Directory path to save coadds. Defaults to 'out_cutouts'.
     config_template : Template for Swarp config file. Defaults to 'config.swarp'.
+    combine_type: COMBINE_TYPE keyword of config.swarp
     
     NOTE: NB_wav_Arr can be:
         - Single integer: Make coadds for single NB
