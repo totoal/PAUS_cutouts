@@ -88,7 +88,7 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
             
         try:
             cutout = Cutout2D(img, coords, size=cutout_square_size * u.deg,
-                              wcs=wcs, mode='partial', fill_value=0)
+                              wcs=wcs, mode='trim')
             cutout_hdu = hdul[0]
             cutout_hdu.data = cutout.data
             cutout_hdu.header.update(cutout.wcs.to_header())
@@ -179,8 +179,9 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             # Crop images
             excluded_images = crop_images(df, RA, DEC, square_size,
                                           tmp_files_dir)
-            crop_images(df, RA, DEC, square_size, tmp_files_dir,
-                        suffix='.weight')
+            if combine_type == 'WEIGHTED':
+                crop_images(df, RA, DEC, square_size, tmp_files_dir,
+                            suffix='.weight')
             
             # Read zero point list file to check if there is any nans
             with open(f'{tmp_files_dir}/zero_points.txt', 'r') as file:
