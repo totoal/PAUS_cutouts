@@ -21,6 +21,8 @@ def get_images_info(RA, DEC, NB_wav_Arr, search_size=0.05,
     dsn = 'postgresql://readonly:PAUsc1ence@db.pau.pic.es/dm'
     engine = sqla.create_engine(dsn)
 
+    search_size = np.min([0.05, search_size])
+    
     # Search in a larger square because images are not exact
     # rectangles in RA, DEC
     ra_min = RA - search_size
@@ -171,7 +173,7 @@ def generate_coadded_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                 
         for RA, DEC, ID in zip(RA_Arr, DEC_Arr, ID_Arr):
             print(f'\n\n {RA=}, {DEC=}, {ID=}\n')
-            df = get_images_info(RA, DEC, NB_wav)
+            df = get_images_info(RA, DEC, NB_wav, square_size)
 
             # Copy images to temporary directory
             generate_image_list(df, tmp_files_dir)
