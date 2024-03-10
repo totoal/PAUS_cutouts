@@ -10,7 +10,7 @@ HEADER_SUFFIX          .head           # Filename extension for additional heade
  
 #------------------------------- Input Weights --------------------------------
  
-WEIGHT_TYPE            BACKGROUND            # BACKGROUND,MAP_RMS,MAP_VARIANCE
+WEIGHT_TYPE            weighttype_cutouts            # BACKGROUND,MAP_RMS,MAP_VARIANCE
                                        # or MAP_WEIGHT
 WEIGHT_SUFFIX          .weight.fits    # Suffix to use for weight-maps
 WEIGHT_IMAGE                           # Weightmap filename if suffix not used
@@ -40,7 +40,7 @@ IMAGE_SIZE             0               # Image size (0 = AUTOMATIC)
 #-------------------------------- Resampling ----------------------------------
  
 RESAMPLE               Y               # Resample input images (Y/N)?
-RESAMPLE_DIR           tmp_files_cutouts               # Directory path for resampled images
+RESAMPLE_DIR           tmpfiledir               # Directory path for resampled images
 RESAMPLE_SUFFIX        .resamp.fits    # filename extension for resampled images
  
 RESAMPLING_TYPE        LANCZOS3        # NEAREST,BILINEAR,LANCZOS2,LANCZOS3
