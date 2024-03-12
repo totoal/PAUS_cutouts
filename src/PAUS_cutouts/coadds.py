@@ -192,7 +192,7 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
     for NB_wav in NB_wav_Arr:                
         for RA, DEC, ID, square_size_tmp in zip(RA_Arr, DEC_Arr, ID_Arr, square_size):
             print(f'\n\n {RA=}, {DEC=}, {ID=}\n')
-            df = get_images_info(RA, DEC, NB_wav, square_size)
+            df = get_images_info(RA, DEC, NB_wav, square_size_tmp)
 
             # Copy images to temporary directory
             generate_image_list(df, single_epoch_dir, save_exp_time=save_exp_time)
