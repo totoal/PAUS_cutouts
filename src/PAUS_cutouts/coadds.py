@@ -164,7 +164,7 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
     save_coadds_dir : Directory path to save coadds. Defaults to 'coadd_cutouts'.
     config_template : Template for Swarp config file. Defaults to 'config.swarp'.
     combine_type: COMBINE_TYPE keyword of config.swarp. Defaults to AVERAGE
-    combine_type: WEIGHT_TYPE keyword of config.swarp. Defaults to BACKGROUND
+    weight_type: WEIGHT_TYPE keyword of config.swarp. Defaults to BACKGROUND
     delete_single_epoch: Delete the single_epoch_dir directory after coadding. Default is False
     only_contained: Keep only cutouts that contain the exact coordinates of the object. Default is True
     coadd: Coadd the single-epoch cutouts using SWarp. Default is True
