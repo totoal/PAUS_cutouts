@@ -118,29 +118,6 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
     return excluded_images
 
 
-def rm_tmp_dir(func):
-    def inner(*args, **kwargs):
-        if 'single_epoch_dir' in kwargs.keys():
-            single_epoch_dir = kwargs['single_epoch_dir']
-        elif len(args) > 5:
-            single_epoch_dir = args[5]
-        else:
-            single_epoch_dir = 'single_epoch_cutouts'
-            
-        # Never set exist_ok=True or very bad things could happen !!
-        os.makedirs(single_epoch_dir, exist_ok=False)
-        
-        try:
-            func(*args, **kwargs)
-            shutil.rmtree(single_epoch_dir)
-        except:
-            shutil.rmtree(single_epoch_dir)
-            raise            
-        
-    return inner
-
-
-#@rm_tmp_dir
 def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                              NB_wav_Arr, single_epoch_dir='single_epoch_cutouts',
                              save_coadds_dir='coadd_cutouts',
