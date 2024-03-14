@@ -155,6 +155,7 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
     Returns:
     None
     """
+    single_epoch_dir_tmp = single_epoch_dir + '_tmp'
     RA_Arr = np.atleast_1d(RA_Arr)
     DEC_Arr = np.atleast_1d(DEC_Arr)
     ID_Arr = np.atleast_1d(ID_Arr)
@@ -172,16 +173,16 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
             df = get_images_info(RA, DEC, NB_wav, square_size_tmp)
 
             # Copy images to temporary directory
-            generate_image_list(df, single_epoch_dir, save_exp_time=save_exp_time)
+            generate_image_list(df, single_epoch_dir_tmp, save_exp_time=save_exp_time)
 
             # Crop images. Weight maps will always be downloaded, just in case
             excluded_images = crop_images(df, RA, DEC, square_size_tmp,
-                                          single_epoch_dir, only_contained=only_contained)
-            crop_images(df, RA, DEC, square_size_tmp, single_epoch_dir,
+                                          single_epoch_dir_tmp, only_contained=only_contained)
+            crop_images(df, RA, DEC, square_size_tmp, single_epoch_dir_tmp,
                         suffix='.weight', only_contained=only_contained)
 
             # Read zero point list file to check if there is any nans
-            with open(f'{single_epoch_dir}/zero_points.txt', 'r') as file:
+            with open(f'{single_epoch_dir_tmp}/zero_points.txt', 'r') as file:
                     zp_list_lines = file.readlines()
             for i, line in enumerate(zp_list_lines):
                 if line[:3] == 'nan':
@@ -189,22 +190,22 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
 
             # Remove excluded images from list
             if len(excluded_images) > 0:
-                with open(f'{single_epoch_dir}/img_list.txt', 'r') as file:
+                with open(f'{single_epoch_dir_tmp}/img_list.txt', 'r') as file:
                     img_list_lines = file.readlines()
-                with open(f'{single_epoch_dir}/img_list.txt', 'w') as file:
+                with open(f'{single_epoch_dir_tmp}/img_list.txt', 'w') as file:
                     for i, line in enumerate(img_list_lines):
                         if i not in excluded_images:
                             file.write(line)
                 
-                with open(f'{single_epoch_dir}/zero_points.txt', 'w') as file:
+                with open(f'{single_epoch_dir_tmp}/zero_points.txt', 'w') as file:
                     for i, line in enumerate(zp_list_lines):
                         if i not in excluded_images:
                             file.write(line)
                             
                 if save_exp_time:
-                    with open(f'{single_epoch_dir}/exp_time.txt', 'r') as file:
+                    with open(f'{single_epoch_dir_tmp}/exp_time.txt', 'r') as file:
                         exp_time_lines = file.readlines()
-                    with open(f'{single_epoch_dir}/exp_time.txt', 'w') as file:
+                    with open(f'{single_epoch_dir_tmp}/exp_time.txt', 'w') as file:
                         for i, line in enumerate(exp_time_lines):
                             if i not in excluded_images:
                                 file.write(line)
@@ -227,15 +228,15 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                     out_filename_w = f'{save_coadds_to}/coadd_cutout_{ID}.weight.fits'
                     filedata = filedata.replace('combinetype_cutouts', combine_type)
                     filedata = filedata.replace('weighttype_cutouts', weight_type)
-                    filedata = filedata.replace('tmpfiledir', single_epoch_dir)
+                    filedata = filedata.replace('tmpfiledir', single_epoch_dir_tmp)
 
-                with open(f'{single_epoch_dir}/config.swarp', 'w') as file:
+                with open(f'{single_epoch_dir_tmp}/config.swarp', 'w') as file:
                     file.write(filedata)
 
                 # Run swarp
-                img_list_path = f'{single_epoch_dir}/img_list.txt'
-                zp_list_path = f'{single_epoch_dir}/zero_points.txt'
-                config_file_path = f'{single_epoch_dir}/config.swarp'
+                img_list_path = f'{single_epoch_dir_tmp}/img_list.txt'
+                zp_list_path = f'{single_epoch_dir_tmp}/zero_points.txt'
+                config_file_path = f'{single_epoch_dir_tmp}/config.swarp'
                 swarp_path = '/data/astro/software/centos7/swarp/2.41.5/bin/swarp'
 
                 os_out = os.system(f'{swarp_path} @{img_list_path} -c {config_file_path} -FSCALE_DEFAULT @{zp_list_path} -FSCALE_KEYWORD "nokeyword"')
@@ -244,11 +245,11 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
 
             # Delete tmp files for this coadd
             if delete_single_epoch:
-                shutil.rmtree(single_epoch_dir)
-                #tmp_files = glob.glob(f'{single_epoch_dir}/*')
+                shutil.rmtree(single_epoch_dir_tmp)
+                #tmp_files = glob.glob(f'{single_epoch_dir_tmp}/*')
                 #for f in tmp_files:
                 #    os.remove(f)
                     
             else:
-                shutil.move(f'{single_epoch_dir}', f'{single_epoch_dir}_{ID}/{NB_wav}')
+                shutil.move(f'{single_epoch_dir_tmp}', f'single_epoch/{single_epoch_dir}_{ID}/{NB_wav}')
 
