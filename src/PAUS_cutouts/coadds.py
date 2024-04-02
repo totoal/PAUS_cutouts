@@ -240,7 +240,7 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                 swarp_path = '/data/astro/software/centos7/swarp/2.41.5/bin/swarp'
 
                 os_out = os.system(f'{swarp_path} @{img_list_path} -c {config_file_path} -FSCALE_DEFAULT @{zp_list_path} -FSCALE_KEYWORD "nokeyword"')
-                if os_out != 0:
+                if os_out != 0 and os_out != 256:
                     raise Exception(f'Error {os_out}')
 
             # Delete tmp files for this coadd
