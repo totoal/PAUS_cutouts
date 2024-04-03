@@ -43,7 +43,8 @@ def get_images_info(RA, DEC, NB_wav_Arr, search_size=0.05,
 
             
         query = f"""SELECT i.archivepath, i.filename, i.zp_nightly,
-                i.ra_min, i.ra_max, i.dec_min, i.dec_max, m.exp_time
+                i.ra_min, i.ra_max, i.dec_min, i.dec_max, m.exp_time,
+                i.psf_fwhm
                 FROM image as i
                 JOIN mosaic as m
                 ON i.mosaic_id = m.id
@@ -66,16 +67,21 @@ def generate_image_list(df, save_path, save_exp_time=False):
     img_list = []
     zp_list = []
     exp_time_list = []
+    seeing_list = []
     for _, row in df.iterrows():
         img_list.append(row.filename)
         zp_list.append(row.zp_nightly)
         exp_time_list.append(row.exp_time)
+        seeing_list.append(row.psf_fwhm)
                 
     with open(f'{save_path}/img_list.txt', 'w') as writer:
         [writer.write(f'{save_path}/{img_name}\n') for img_name in img_list]
         
     with open(f'{save_path}/zero_points.txt', 'w') as writer:
         [writer.write(f'{zp}\n') for zp in zp_list]
+        
+    with open(f'{save_path}/psf_fwhm.txt', 'w') as writer:
+        [writer.write(f'{fwhm}\n') for fwhm in seeing_list]
         
     if save_exp_time:
         with open(f'{save_path}/exp_time.txt', 'w') as writer:
