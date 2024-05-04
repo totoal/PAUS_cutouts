@@ -1,6 +1,6 @@
 [project]
 name = "PAUS_cutouts"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
   { name="Alberto Torralba", email="alberto.torralba@uv.es" },
 ]
@@ -13,7 +13,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-dependencies = ["numpy", "pandas", "astropy", "sqlalchemy"]
+dependencies = ["numpy", "pandas", "astropy", "sqlalchemy", "psycopg2-binary"]
 
 [project.urls]
 Homepage = "https://github.com/totoal/PAUS_cutouts"
