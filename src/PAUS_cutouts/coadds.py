@@ -237,7 +237,7 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                 img_list_path = f'{single_epoch_dir_tmp}/img_list.txt'
                 zp_list_path = f'{single_epoch_dir_tmp}/zero_points.txt'
                 config_file_path = f'{single_epoch_dir_tmp}/config.swarp'
-                swarp_path = '/data/astro/software/centos7/swarp/2.41.5/bin/swarp'
+                swarp_path = '/data/astro/software/swarp/2.41.5/bin/swarp'
 
                 os_out = os.system(f'{swarp_path} @{img_list_path} -c {config_file_path} -FSCALE_DEFAULT @{zp_list_path} -FSCALE_KEYWORD "nokeyword"')
                 if os_out != 0 and os_out != 256:
@@ -251,5 +251,5 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                 #    os.remove(f)
                     
             else:
-                shutil.move(f'{single_epoch_dir_tmp}', f'single_epoch/{single_epoch_dir}_{ID}/{NB_wav}')
+                shutil.move(f'{single_epoch_dir_tmp}', f'{single_epoch_dir}/{NB_wav}/{ID}')
 
