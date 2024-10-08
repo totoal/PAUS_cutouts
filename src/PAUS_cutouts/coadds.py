@@ -42,7 +42,7 @@ def get_images_info(RA, DEC, NB_wav_Arr, search_size=0.05,
             AND NOT ({dec_min} >= i.dec_max OR {dec_max} <= i.dec_min)"""
 
             
-        query = f"""SELECT i.archivepath, i.filename, i.zp_nightly,
+        query = f"""SELECT i.archivepath, i.filename, i.zp_nightly, i.zp_nightly_err,
                 i.ra_min, i.ra_max, i.dec_min, i.dec_max, m.exp_time,
                 i.psf_fwhm
                 FROM image as i
@@ -66,11 +66,13 @@ def generate_image_list(df, save_path, save_exp_time=False):
     
     img_list = []
     zp_list = []
+    zp_err_list = []
     exp_time_list = []
     seeing_list = []
     for _, row in df.iterrows():
         img_list.append(row.filename)
         zp_list.append(row.zp_nightly)
+        zp_err_list.append(row.zp_nightly_err)
         exp_time_list.append(row.exp_time)
         seeing_list.append(row.psf_fwhm)
                 
@@ -80,6 +82,9 @@ def generate_image_list(df, save_path, save_exp_time=False):
     with open(f'{save_path}/zero_points.txt', 'w') as writer:
         [writer.write(f'{zp}\n') for zp in zp_list]
         
+    with open(f'{save_path}/zero_points_err.txt', 'w') as writer:
+        [writer.write(f'{zp_err}\n') for zp_err in zp_err_list]
+
     with open(f'{save_path}/psf_fwhm.txt', 'w') as writer:
         [writer.write(f'{fwhm}\n') for fwhm in seeing_list]
         
@@ -93,33 +98,43 @@ def crop_images(df, RA, DEC, cutout_square_size, savepath,
     excluded_images = []
     for i, (archivepath, fname) in enumerate(zip(df.archivepath, df.filename)):
         fname = '.'.join(fname.split('.')[:-1]) + f'{suffix}.fits'
-        
-        hdul = fits.open(f'{archivepath}/{fname}')
-        img = hdul[0].data
-        coords = SkyCoord(RA, DEC, unit='deg')
-        wcs = WCS(hdul[0])
-        
-        # Check if (RA,DEC) position is contained in the wcs of the image
-        if not coords.contained_by(wcs, image=img) and only_contained:
-            print(f'Skipping {fname}: Coordinates not contained in the image.')
-            excluded_images.append(i)
-            continue
-            
+
+        file_found = True
         try:
-            cutout = Cutout2D(img, coords, size=cutout_square_size * u.deg,
-                              wcs=wcs, mode='trim')
-            cutout_hdu = hdul[0]
-            cutout_hdu.data = cutout.data
-            cutout_hdu.header.update(cutout.wcs.to_header())
-            cutout_hdu.writeto(f'{savepath}/{fname}', overwrite=True)
-        except NoOverlapError:
-            print(f'Skipping {fname}: no overlap with desired area.')
+            hdul = fits.open(f'{archivepath}/{fname}')
+
+        except FileNotFoundError:
+            print(f'{fname} not found, skipping it')
             excluded_images.append(i)
-            continue
-        
-        if not np.all(cutout.data.shape):
-            print(f'Skipping {fname}: Cutout has zero dimension.')
-            excluded_images.append(i)
+            file_found = False
+
+        if file_found:
+            img = hdul[0].data
+            coords = SkyCoord(RA, DEC, unit='deg')
+            wcs = WCS(hdul[0])
+            
+            # Check if (RA,DEC) position is contained in the wcs of the image
+            if not coords.contained_by(wcs, image=img) and only_contained:
+                print(f'Skipping {fname}: Coordinates not contained in the image.')
+                excluded_images.append(i)
+                continue
+                
+            try:
+                cutout = Cutout2D(img, coords, size=cutout_square_size * u.deg,
+                                  wcs=wcs, mode='trim')
+                cutout_hdu = hdul[0]
+                cutout_hdu.data = cutout.data
+                cutout_hdu.header.update(cutout.wcs.to_header())
+                cutout_hdu.writeto(f'{savepath}/{fname}', overwrite=True)
+    
+            except NoOverlapError:
+                print(f'Skipping {fname}: no overlap with desired area.')
+                excluded_images.append(i)
+                continue
+            
+            if not np.all(cutout.data.shape):
+                print(f'Skipping {fname}: Cutout has zero dimension.')
+                excluded_images.append(i)
     
     return excluded_images
 
@@ -195,19 +210,40 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                     excluded_images.append(i)
 
             # Remove excluded images from list
-            if len(excluded_images) > 0:
+            if len(excluded_images) > 0:                
                 with open(f'{single_epoch_dir_tmp}/img_list.txt', 'r') as file:
                     img_list_lines = file.readlines()
                 with open(f'{single_epoch_dir_tmp}/img_list.txt', 'w') as file:
                     for i, line in enumerate(img_list_lines):
                         if i not in excluded_images:
                             file.write(line)
+
+                        else: # Deleting image if won't be used
+                            img_path_to_remove = line
+                            if img_path_to_remove[-1] == '\n':
+                                img_path_to_remove = img_path_to_remove[:-1]
+
+                            try:
+                                weight_path_to_remove = img_path_to_remove[:-4]
+                                weight_path_to_remove += 'weight.fits'
+                                os.remove(img_path_to_remove)
+                                os.remove(weight_path_to_remove)
+    
+                            except FileNotFoundError:
+                                pass
                 
                 with open(f'{single_epoch_dir_tmp}/zero_points.txt', 'w') as file:
                     for i, line in enumerate(zp_list_lines):
                         if i not in excluded_images:
                             file.write(line)
-                            
+
+                with open(f'{single_epoch_dir_tmp}/zero_points_err.txt', 'r') as file:
+                    zp_err_list_lines = file.readlines()
+                with open(f'{single_epoch_dir_tmp}/zero_points_err.txt', 'w') as file:
+                    for i, line in enumerate(zp_err_list_lines):
+                        if i not in excluded_images:
+                            file.write(line)
+
                 if save_exp_time:
                     with open(f'{single_epoch_dir_tmp}/exp_time.txt', 'r') as file:
                         exp_time_lines = file.readlines()
@@ -215,6 +251,7 @@ def generate_cutouts(RA_Arr, DEC_Arr, ID_Arr, square_size,
                         for i, line in enumerate(exp_time_lines):
                             if i not in excluded_images:
                                 file.write(line)
+
                             
             ### Generate new Swarp config file from template
             if coadd:
